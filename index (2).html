@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intervisiespiegel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow column, phone-first; two role sections, then one tip card */
+:root{
+  --bg:#EEF2F0;
+  --surface:#FFFFFF;
+  --ink:#1D2F2B;
+  --muted:#5B6B67;
+  --line:#D3DCD8;
+  --accent:#2F6F62;
+  --accent-soft:#DCEAE5;
+  --warm:#B5793A;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A18; --surface:#1A2522; --ink:#E4ECE9; --muted:#9AAAA5; --line:#2E3B37;
+    --accent:#6FB8A6; --accent-soft:#223631; --warm:#D9A066; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A18; --surface:#1A2522; --ink:#E4ECE9; --muted:#9AAAA5; --line:#2E3B37;
+  --accent:#6FB8A6; --accent-soft:#223631; --warm:#D9A066; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.05rem;line-height:1.5}
+.wrap{max-width:40rem;margin:0 auto;padding-block:2rem 3rem;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:1.75rem}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:clamp(1.9rem,6vw,2.5rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:700}
+.intro{display:flex;flex-direction:column;gap:.6rem}
+.intro p{margin:0;color:var(--muted);max-width:36rem}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);font-weight:700}
+.legend-scale{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+section.role{display:flex;flex-direction:column;gap:1rem}
+.role-head{display:flex;flex-direction:column;gap:.15rem;padding-bottom:.4rem;border-bottom:2px solid var(--ink)}
+.role-head span{font-size:.9rem;color:var(--muted)}
+fieldset.item{border:0;margin:0;padding:1rem;background:var(--surface);border-radius:10px;border:1px solid var(--line);
+  display:flex;flex-direction:column;gap:.8rem;min-width:0}
+fieldset.item legend{padding:0;float:left;width:100%;font-weight:400}
+fieldset.item legend + *{clear:both}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;
+  min-height:3rem;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;
+  font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--muted);
+  transition:background .15s,border-color .15s,color .15s;user-select:none}
+.scale label small{font-family:var(--body);font-weight:400;font-size:.68rem;line-height:1.1;text-align:center}
+.scale label:hover{border-color:var(--accent)}
+.scale input:checked + label{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.scale input:focus-visible + label{outline:3px solid var(--warm);outline-offset:2px}
+.choice{display:flex;flex-direction:column;gap:.5rem}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice label{border:1.5px solid var(--line);border-radius:8px;padding:.75rem .9rem;cursor:pointer;transition:background .15s,border-color .15s}
+.choice label:hover{border-color:var(--accent)}
+.choice input:checked + label{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.choice input:focus-visible + label{outline:3px solid var(--warm);outline-offset:2px}
+.discuss{border:1.5px solid var(--accent);border-radius:10px;padding:1.1rem 1.15rem;display:flex;flex-direction:column;gap:.6rem}
+.discuss p{margin:0}
+.discuss ul{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.25rem}
+.bar{position:sticky;bottom:0;padding-block:.9rem calc(.9rem + env(safe-area-inset-bottom, 0px));
+  background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  border-top:1px solid var(--line)}
+.count{font-size:.95rem;color:var(--muted);font-variant-numeric:tabular-nums}
+button{font:inherit;font-family:var(--display);font-weight:700;border-radius:8px;cursor:pointer;
+  padding:.75rem 1.3rem;border:0;background:var(--accent);color:var(--surface);font-size:1rem}
+button:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+button.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+button:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+#result{display:flex;flex-direction:column;gap:1.25rem}
+.tip{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--warm);border-radius:10px;
+  padding:1.3rem 1.25rem;display:flex;flex-direction:column;gap:.7rem}
+.tip .based{font-size:.9rem;color:var(--muted);font-style:italic;margin:0}
+.tip h2{font-size:1.4rem}
+.tip p{margin:0}
+.overview{display:flex;flex-direction:column;gap:.5rem}
+.row{display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;font-size:.9rem}
+.row span{min-width:0}
+.dots{display:flex;gap:4px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--accent)}
+.row.low span{font-weight:700}
+.row.low .dots i.on{background:var(--warm)}
+.round{background:var(--accent-soft);border-radius:10px;padding:1rem 1.15rem;margin:0}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body style="margin:0">
+
+
+<div class="wrap" id="app">
+  <header class="intro">
+    <div class="eyebrow">Check-in · intervisie</div>
+    <h1>Hoe sta jij er vandaag in als intervisant?</h1>
+    <p>Tien korte vragen, een paar minuten. Kies wat past bij hoe het meestal gaat, niet hoe het zou moeten. Na afloop krijg je één tip voor deze bijeenkomst en een vraag om in de groep over door te praten. Je antwoorden blijven op je eigen scherm.</p>
+  </header>
+
+  <form id="scan" novalidate>
+    <div style="display:flex;flex-direction:column;gap:1.75rem">
+      <section class="role" aria-labelledby="h-vrager">
+        <div class="role-head"><h2 id="h-vrager">Als vraagsteller</h2><span>Wanneer een ander inbrengt</span></div>
+        <div id="items-vrager" style="display:flex;flex-direction:column;gap:.75rem"></div>
+      </section>
+      <section class="role" aria-labelledby="h-inbrenger">
+        <div class="role-head"><h2 id="h-inbrenger">Als inbrenger</h2><span>Wanneer jij een situatie inbrengt</span></div>
+        <div id="items-inbrenger" style="display:flex;flex-direction:column;gap:.75rem"></div>
+      </section>
+      <section class="role" aria-labelledby="h-ruimte">
+        <div class="role-head"><h2 id="h-ruimte">Ruimte innemen</h2><span>Niet te veel en niet te weinig</span></div>
+        <div id="items-ruimte" style="display:flex;flex-direction:column;gap:.75rem"></div>
+      </section>
+      <section class="role" aria-labelledby="h-veilig">
+        <div class="role-head"><h2 id="h-veilig">Veilige sfeer</h2><span>Wat jij bijdraagt aan de groep</span></div>
+        <div id="items-veilig" style="display:flex;flex-direction:column;gap:.75rem"></div>
+        <fieldset class="item" id="keuze">
+          <legend>Welke uitspraak komt het dichtst bij wat jij onder een veilige intervisiegroep verstaat?</legend>
+          <div class="choice">
+            <input type="radio" name="veilig" value="comfort" id="v-comfort">
+            <label for="v-comfort">Ik voel me op mijn gemak en hoef niet bang te zijn voor kritiek.</label>
+            <input type="radio" name="veilig" value="schuren" id="v-schuren">
+            <label for="v-schuren">Ik kan iets ongemakkelijks zeggen of vragen, en een ander kan dat ook bij mij.</label>
+          </div>
+        </fieldset>
+      </section>
+    </div>
+    <div class="bar">
+      <span class="count" id="count">0 van 10 ingevuld</span>
+      <button type="submit" id="go" disabled>Toon mijn tip</button>
+    </div>
+  </form>
+
+  <div id="result" hidden></div>
+</div>
+
+<script>
+const SCALE = ["zelden","soms","regel­matig","vaak","bijna altijd"];
+const ITEMS = [
+  {id:"open", role:"vrager", kort:"Open vragen zonder verstopt advies",
+   text:"Ik stel open vragen die de inbrenger helpen verder te denken, zonder dat er al een advies in verstopt zit.",
+   tip:"Toets vandaag elke vraag voordat je hem stelt. Begint hij met ‘Heb je al overwogen om…’ of kan er alleen ja of nee op volgen? Maak er dan een wat- of hoe-vraag van, bijvoorbeeld: ‘Wat maakt dat je…?’"},
+  {id:"uitstellen", role:"vrager", kort:"Oordeel en oplossing uitstellen",
+   text:"Ik stel mijn oordeel en mijn oplossingen uit tot de werkwijze daar ruimte voor geeft.",
+   tip:"Volg vandaag strikt de fasering van de methode. Komt er eerder een oplossing of oordeel in je op, schrijf het dan op en bewaar het tot de fase waarin het hoort."},
+  {id:"persoon", role:"vrager", kort:"Evenwicht tussen situatie en inbrenger",
+   text:"Mijn vragen gaan niet alleen over de situatie, maar ook over wat de inbrenger zelf dacht, voelde en deed.",
+   tip:"Let vandaag op welk soort vragen je stelt. Merk je dat je vooral naar de situatie vraagt, stel dan een vraag over de inbrenger zelf, zoals ‘Wat dacht je op dat moment?’ of ‘Wat deed dat met je?’"},
+  {id:"aandeel", role:"inbrenger", kort:"Eigen aandeel inbrengen",
+   text:"Ik breng een situatie in waarin ik mijn eigen aandeel benoem, en niet alleen het gedrag van een ander beschrijf.",
+   tip:"Breng je vandaag in, sta dan vooraf stil bij de vraag wat jouw aandeel in de situatie is en neem dat op in je inbreng. Breng je niet in, help de inbrenger dan dat aandeel te vinden met een vraag als ‘Wat deed jij op dat moment?’"},
+  {id:"perspectief", role:"inbrenger", kort:"Openstaan voor een afwijkend perspectief",
+   text:"Ik sta open voor een perspectief dat afwijkt van hoe ik de situatie zelf zie.",
+   tip:"Voelt een vraag of opmerking vandaag ongemakkelijk, ga dan niet meteen uitleggen of verdedigen. Zeg eerst: ‘Vertel eens meer’. Dat geldt als inbrenger, maar ook als een medevraagsteller iets inbrengt waar jij anders over denkt."},
+  {id:"afstemmen", role:"ruimte", kort:"Ruimte afstemmen op de vraag",
+   text:"Ik stem de ruimte die ik neem af op wat er gevraagd wordt, bijvoorbeeld één vraag of een kort antwoord, ook als ik meer te zeggen heb.",
+   tip:"Let vandaag goed op wat de begeleider vraagt. Gaat het om één vraag of een kort antwoord, kies dan uit wat je wilt zeggen het ene dat de inbrenger het verst helpt en bewaar de rest. Hoe minder vragen er tegelijk komen, hoe meer ruimte de inbrenger heeft om echt na te denken."},
+  {id:"bijdragen", role:"ruimte", kort:"Bijdragen, ook als het nog niet af is",
+   text:"Ook als ik twijfel of denk dat alles al gezegd is, lever ik een eigen bijdrage.",
+   tip:"Merk je vandaag dat je wilt zeggen ‘ik weet het even niet’ of ‘alles is al gezegd’? Zeg dan wat er wél in je opkomt, ook als het nog niet af is. Is er echt al veel gezegd, benoem dan welk punt jou het meest raakt en waarom. Een gedachte die nog niet af is, helpt de groep vaak meer dan niets zeggen."},
+  {id:"kwetsbaar", role:"veilig", kort:"Zelf het voorbeeld geven",
+   text:"Ik draag zelf bij aan een veilige sfeer, bijvoorbeeld door mijn eigen twijfels of fouten te laten zien.",
+   tip:"Laat vandaag ergens zien waar je zelf twijfelt of iets niet weet. Wacht niet tot een ander de eerste stap zet: wie zich laat zien, maakt het voor de rest makkelijker."},
+  {id:"benoemen", role:"veilig", kort:"Benoemen wat er in de groep gebeurt",
+   text:"Als er in de groep iets gebeurt dat niet goed voelt, benoem ik dat zelf, ook als het ongemakkelijk is.",
+   tip:"Merk je vandaag dat de sfeer verschuift, bijvoorbeeld doordat iemand stilvalt of een vraag verkeerd landt, benoem dan wat je ziet: ‘Ik merk dat…’. De sfeer is van de hele groep, niet alleen van de begeleider."}
+];
+
+function render(){
+  ITEMS.forEach((it,i)=>{
+    const fs=document.createElement("fieldset");
+    fs.className="item";
+    const lg=document.createElement("legend");
+    lg.textContent=it.text;
+    fs.appendChild(lg);
+    const sc=document.createElement("div");
+    sc.className="scale";
+    SCALE.forEach((lab,v)=>{
+      const id=`q-${it.id}-${v+1}`;
+      const inp=document.createElement("input");
+      inp.type="radio"; inp.name=it.id; inp.value=v+1; inp.id=id;
+      const l=document.createElement("label");
+      l.htmlFor=id;
+      l.innerHTML=`${v+1}<small>${lab}</small>`;
+      sc.append(inp,l);
+    });
+    fs.appendChild(sc);
+    document.getElementById("items-"+it.role).appendChild(fs);
+  });
+}
+render();
+
+const form=document.getElementById("scan");
+const go=document.getElementById("go");
+const count=document.getElementById("count");
+function answers(){
+  const a={};
+  ITEMS.forEach(it=>{const c=form.querySelector(`input[name="${it.id}"]:checked`); if(c) a[it.id]=+c.value;});
+  return a;
+}
+const TOTAL=ITEMS.length+1;
+function keuze(){
+  const c=form.querySelector('input[name="veilig"]:checked');
+  return c?c.value:null;
+}
+form.addEventListener("change",()=>{
+  const n=Object.keys(answers()).length+(keuze()?1:0);
+  count.textContent=`${n} van ${TOTAL} ingevuld`;
+  go.disabled=n<TOTAL;
+});
+
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  const a=answers();
+  const k=keuze();
+  if(Object.keys(a).length<ITEMS.length||!k) return;
+  const min=Math.min(...Object.values(a));
+  const lowest=ITEMS.filter(it=>a[it.id]===min);
+  const pick=lowest[Math.floor(Math.random()*lowest.length)];
+  const res=document.getElementById("result");
+  const intro = min>=4
+    ? "Je scoort jezelf overal hoog. Kies dan vandaag voor verfijning op het punt dat het minst vanzelf gaat:"
+    : "Op dit punt valt voor jou vandaag het meest te winnen:";
+  const rows=ITEMS.map(it=>{
+    const dots=[1,2,3,4,5].map(n=>`<i class="${n<=a[it.id]?"on":""}"></i>`).join("");
+    return `<div class="row${it.id===pick.id?" low":""}"><span>${it.kort}</span><div class="dots" aria-label="score ${a[it.id]} van 5">${dots}</div></div>`;
+  }).join("");
+  res.innerHTML=`
+    <div class="eyebrow">Jouw tip voor vandaag</div>
+    <div class="tip">
+      <p class="based">${intro}</p>
+      <h2>${pick.kort}</h2>
+      <p>${pick.tip}</p>
+    </div>
+    <div class="discuss">
+      <div class="eyebrow">Om samen over door te praten</div>
+      <p>${k==="comfort"
+        ? "Je koos voor veiligheid als je op je gemak voelen. Dat is begrijpelijk, maar het is maar een deel van het verhaal."
+        : "Je koos voor veiligheid als ruimte voor ongemakkelijke vragen en tegenspraak. Daarmee leg je de lat hoger dan alleen je op je gemak voelen."}</p>
+      <ul>
+        <li><strong>Veilig is wel:</strong> dat je twijfel, een fout of een kritische vraag kunt inbrengen zonder dat het de relatie schaadt.</li>
+        <li><strong>Veilig is niet:</strong> altijd comfortabel, altijd aardig, of vrij van ongemak en tegenspraak.</li>
+      </ul>
+      <p><strong>Vraag voor de groep:</strong> wat is er vandaag nodig om het hier veilig genoeg te maken om ook ongemakkelijke dingen te kunnen zeggen, en wat doe jij daar zelf aan?</p>
+    </div>
+    <p class="round"><strong>In het check-inrondje:</strong> deel in één of twee zinnen welke tip je kreeg en welke uitspraak over veiligheid je koos.</p>
+    <div class="overview">
+      <div class="eyebrow" style="color:var(--muted)">Jouw scores</div>
+      ${rows}
+    </div>
+    <div class="actions">
+      <button type="button" class="ghost" id="again">Opnieuw invullen</button>
+    </div>`;
+  form.hidden=true;
+  res.hidden=false;
+  document.querySelector(".intro").hidden=true;
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("again").addEventListener("click",()=>{
+    form.reset();
+    count.textContent=`0 van ${TOTAL} ingevuld`;
+    go.disabled=true;
+    res.hidden=true; form.hidden=false;
+    document.querySelector(".intro").hidden=false;
+    window.scrollTo({top:0});
+  });
+});
+</script>
+
+</body>
+</html>
